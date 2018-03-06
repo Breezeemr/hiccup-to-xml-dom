@@ -1,4 +1,4 @@
-(defproject com.breezeehr/hiccup-to-xml-dom "0.2.2"
+(defproject com.breezeehr/hiccup-to-xml-dom "0.1.0"
   :description "Hiccup style XML DOM constructor using javax"
   :url "https://github.com/Breezeemr/hiccup-to-xml-dom/"
   :license {:name "Eclipse Public License"
