@@ -3,7 +3,10 @@
            (java.io StringWriter)
            (javax.xml.transform.dom DOMSource)
            (javax.xml.transform TransformerFactory)
-           (javax.xml.transform.stream StreamResult)))
+           (javax.xml.transform.stream StreamResult)
+           (org.w3c.dom Document)
+           (org.w3c.dom.ls LSSerializer DOMImplementationLS)
+           (com.sun.org.apache.xml.internal.serializer.dom3 LSSerializerImpl)))
 
 (defprotocol AsElements
   (as-elements [expr doc doc-ns] "Return a seq of elements represented by an expression."))
@@ -92,10 +95,13 @@
     root))
 
 
-(defn serialize-dom [dom]
-  (let [ls-impl (.. dom (getOwnerDocument) (getImplementation) (getFeature "LS" "3.0"))
-        serializer (.createLSSerializer ls-impl)]
-    (.. serializer (getDomConfig) (setParameter "xml-declaration" false))
+(defn  serialize-dom [^Document dom]
+  (let [ls-impl ^DOMImplementationLS (-> dom
+                                         (.getOwnerDocument)
+                                         (.getImplementation)
+                                         (.getFeature "LS" "3.0"))
+        serializer ^LSSerializer (.createLSSerializer ls-impl)]
+    (-> serializer .getDomConfig (.setParameter "xml-declaration" false))
     (.writeToString serializer dom)))
 
 (defn serialize-dom2 [dom]
@@ -162,8 +168,8 @@
         doc-root (.newDocument db)]
     (compile-element (into [doc-root] content) document-namespace)))
 
-(defn ->dom2 [content & {:keys [document-namespace] :or {document-namespace ""}}]
-  (let [db (make-document-builder)
+(defn ^Document ->dom2 [content & {:keys [document-namespace] :or {document-namespace ""}}]
+  (let [db ^DocumentBuilder (make-document-builder)
         doc-root (.newDocument db)]
     (.appendChild doc-root (sexp-as-element doc-root document-namespace content))
     doc-root))
